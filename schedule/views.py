@@ -60,12 +60,14 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         
         if filter_type == 'week':
             time_data = conferences.annotate(period=TruncWeek('start_time')).values('period').annotate(count=Count('id')).order_by('period')
+            context['time_labels'] = [item['period'].strftime('%d/%m/%Y') for item in time_data]
         elif filter_type == 'year':
             time_data = conferences.annotate(period=TruncYear('start_time')).values('period').annotate(count=Count('id')).order_by('period')
+            context['time_labels'] = [item['period'].strftime('%Y') for item in time_data]
         else: # month (default)
             time_data = conferences.annotate(period=TruncMonth('start_time')).values('period').annotate(count=Count('id')).order_by('period')
+            context['time_labels'] = [item['period'].strftime('Tháng %m/%Y') for item in time_data]
 
-        context['time_labels'] = [item['period'].strftime('%Y-%m-%d') for item in time_data]
         context['time_counts'] = [item['count'] for item in time_data]
         context['filter_type'] = filter_type
         context['start_date'] = start_date
