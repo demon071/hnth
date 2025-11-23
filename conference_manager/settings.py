@@ -138,11 +138,11 @@ LOGOUT_REDIRECT_URL = 'login'
 # CSRF Settings for production
 # IMPORTANT: Add your domain here for production
 CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:8000',
-    'http://127.0.0.1:8000',
+    # 'http://localhost:8000',
+    # 'http://127.0.0.1:8000',
     # Add your production domain here, e.g.:
-    # 'https://yourdomain.com',
-    # 'https://www.yourdomain.com',
+    'https://tt.snaptikz.com',
+    'https://www.tt.snaptikz.com',
 ]
 
 # Security Settings (uncomment for production with HTTPS)
