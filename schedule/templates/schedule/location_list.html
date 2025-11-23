@@ -1,0 +1,56 @@
+{% extends 'schedule/base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Danh Sách Điểm Cầu</h1>
+    <a href="{% url 'location_create' %}" class="btn btn-primary shadow-sm">
+        <i class="bi bi-plus-lg"></i> Thêm Điểm Cầu
+    </a>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Tên Điểm Cầu</th>
+                    <th>Địa Chỉ</th>
+                    <th>Thành Phần Tham Dự</th>
+                    <th class="text-end">Thao Tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for location in locations %}
+                <tr>
+                    <td class="fw-bold">
+                        <a href="{% url 'location_detail' location.pk %}" class="text-decoration-none text-dark">
+                            {{ location.name }}
+                        </a>
+                    </td>
+                    <td>{{ location.address }}</td>
+                    <td>
+                        {% for participant in location.participants.all %}
+                        <span class="badge bg-secondary me-1">{{ participant.name }}</span>
+                        {% empty %}
+                        <span class="text-muted">Chưa có thành phần</span>
+                        {% endfor %}
+                    </td>
+                    <td class="text-end">
+                        <a href="{% url 'location_update' location.pk %}"
+                            class="btn btn-sm btn-outline-primary me-1">Sửa</a>
+                        <a href="{% url 'location_delete' location.pk %}" class="btn btn-sm btn-outline-danger">Xóa</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center py-5">
+                        <p class="text-muted mb-0">Chưa có điểm cầu nào.</p>
+                        <a href="{% url 'location_create' %}" class="btn btn-link">Tạo điểm cầu đầu tiên</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

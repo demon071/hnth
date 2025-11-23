@@ -1,0 +1,119 @@
+{% extends 'schedule/base.html' %}
+
+{% block content %}
+<div class="mb-4">
+    <h1>Tìm Kiếm Thành Phần</h1>
+    <p class="text-muted">Tìm thành phần đang tham dự tại điểm cầu nào.</p>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="d-flex gap-2">
+            <input type="text" id="searchInput" class="form-control" placeholder="Nhập tên thành phần..." autofocus>
+            <button type="button" class="btn btn-secondary" onclick="clearSearch()">Xóa</button>
+        </div>
+    </div>
+</div>
+
+<div id="resultsContainer">
+    <div class="card">
+        <div class="card-header">
+            <span id="resultsHeader">Nhập tên để tìm kiếm</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Tên Thành Phần</th>
+                        <th>Điểm Cầu</th>
+                        <th>Địa Chỉ</th>
+                        <th class="text-end">Thao Tác</th>
+                    </tr>
+                </thead>
+                <tbody id="resultsBody">
+                    <tr>
+                        <td colspan="4" class="text-center py-4">
+                            <p class="text-muted mb-0">Nhập để tìm kiếm...</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    let searchTimeout;
+    const searchInput = document.getElementById('searchInput');
+    const resultsBody = document.getElementById('resultsBody');
+    const resultsHeader = document.getElementById('resultsHeader');
+
+    searchInput.addEventListener('input', function () {
+        clearTimeout(searchTimeout);
+        const query = this.value.trim();
+
+        if (query.length === 0) {
+            resultsHeader.textContent = 'Nhập tên để tìm kiếm';
+            resultsBody.innerHTML = `
+            <tr>
+                <td colspan="4" class="text-center py-4">
+                    <p class="text-muted mb-0">Nhập để tìm kiếm...</p>
+                </td>
+            </tr>
+        `;
+            return;
+        }
+
+        resultsHeader.textContent = 'Đang tìm kiếm...';
+
+        searchTimeout = setTimeout(() => {
+            fetch(`/search/?q=${encodeURIComponent(query)}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    resultsHeader.textContent = `Kết quả tìm kiếm cho "${query}"`;
+
+                    if (data.results.length === 0) {
+                        resultsBody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-center py-4">
+                            <p class="text-muted mb-0">Không tìm thấy kết quả.</p>
+                        </td>
+                    </tr>
+                `;
+                    } else {
+                        resultsBody.innerHTML = data.results.map(participant => `
+                    <tr>
+                        <td class="fw-bold">${participant.name}</td>
+                        <td>${participant.location_name}</td>
+                        <td>${participant.location_address}</td>
+                        <td class="text-end">
+                            <a href="/locations/${participant.location_id}/" class="btn btn-sm btn-outline-primary">Xem Điểm Cầu</a>
+                        </td>
+                    </tr>
+                `).join('');
+                    }
+                })
+                .catch(error => {
+                    console.error('Search error:', error);
+                    resultsBody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="text-center py-4">
+                        <p class="text-danger mb-0">Lỗi khi tải kết quả. Vui lòng thử lại.</p>
+                    </td>
+                </tr>
+            `;
+                });
+        }, 300);
+    });
+
+    function clearSearch() {
+        searchInput.value = '';
+        searchInput.dispatchEvent(new Event('input'));
+        searchInput.focus();
+    }
+</script>
+{% endblock %}
